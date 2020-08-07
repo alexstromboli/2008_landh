@@ -41,3 +41,11 @@ class ParamsWidget:
         self.widget = argumentspanel
         self.ed_source = ed_source
         self.ed_target = ed_target
+
+    def set_params(self, data):
+        self.ed_source.setText(data['zipFilePath'])
+        self.ed_target.setText(data['toDir'])
+
+    def get_params(self, data):
+        data['zipFilePath'] = self.ed_source.text()
+        data['toDir'] = self.ed_target.text()

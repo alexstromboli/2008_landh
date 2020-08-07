@@ -48,9 +48,6 @@ def main():
     argumentspanel.addWidget(QLabel('Arguments'))
     argumentswidget = QWidget()
     argumentspanel.addWidget(argumentswidget)
-    selected_param_proc = params_file_copy.ParamsWidget()
-    selected_param_proc.set_params(dummy_data.data['tasks'][0]['params'])
-    argumentswidget.setLayout(selected_param_proc.widget)
 
     layout.addWidget(QPushButton('Add'))
 
@@ -84,6 +81,17 @@ def main():
     w.resize(700, 500)
     w.move(300, 300)
     w.setWindowTitle('Task Management')
+
+    #
+    task_types = {'file_copy': params_file_copy, 'unzip': params_unzip}
+
+    #
+    task_index = 0
+    task = dummy_data.data['tasks'][task_index]
+    selected_param_proc = task_types[task['type']].ParamsWidget()
+    selected_param_proc.set_params(task['params'])
+    argumentswidget.setLayout(selected_param_proc.widget)
+
     w.show()
 
     sys.exit(app.exec_())
