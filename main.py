@@ -5,9 +5,17 @@ import sys
 from PyQt5.Qt import Qt
 from PyQt5.QtWidgets import QApplication, QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QLabel, QLineEdit, QComboBox
 
-import dummy_data
 import params_file_copy
 import params_unzip
+from tasklist_entry_widget import TaskListEntryWidget
+import dummy_data
+
+tasks_data = dummy_data.data
+
+def SButton(text):
+    button = QPushButton(text)
+    button.setFixedWidth (60)
+    return button
 
 def main():
 
@@ -21,9 +29,9 @@ def main():
     topbar = QHBoxLayout()
     layout.addLayout(topbar)
     topbar.addWidget(QLabel('<file name>'))
-    topbar.addWidget(QPushButton('Open'))
-    topbar.addWidget(QPushButton('Save'))
-    topbar.addWidget(QPushButton('Exit'))
+    topbar.addWidget(SButton('Open'))
+    topbar.addWidget(SButton('Save'))
+    topbar.addWidget(SButton('Exit'))
 
     editpanel = QHBoxLayout()
     layout.addLayout(editpanel)
@@ -49,9 +57,14 @@ def main():
     argumentswidget = QWidget()
     argumentspanel.addWidget(argumentswidget)
 
-    layout.addWidget(QPushButton('Add'))
+    layout.addWidget(SButton('Add'))
 
     layout.addWidget(QLabel('Task List'))
+    tasklist = QVBoxLayout()
+    tasklist.setAlignment(Qt.AlignTop)
+    layout.addLayout(tasklist)
+    for t in tasks_data['tasks']:
+        tasklist.addWidget(TaskListEntryWidget(t))
 
     layout.addWidget(QLabel('Runtime Variables for Simulation'))
     variablespanel = QVBoxLayout()
@@ -87,7 +100,7 @@ def main():
 
     #
     task_index = 0
-    task = dummy_data.data['tasks'][task_index]
+    task = tasks_data['tasks'][task_index]
     selected_param_proc = task_types[task['type']].ParamsWidget()
     selected_param_proc.set_params(task['params'])
     argumentswidget.setLayout(selected_param_proc.widget)
