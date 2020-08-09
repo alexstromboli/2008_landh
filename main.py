@@ -11,11 +11,37 @@ from tasklist_entry_widget import TaskListEntryWidget
 import dummy_data
 
 tasks_data = dummy_data.data
+task_types = {'file_copy': params_file_copy, 'unzip': params_unzip}
+argumentswidget = None
+global argumentspanel
 
 def SButton(text):
     button = QPushButton(text)
     button.setFixedWidth (60)
     return button
+
+def get_task_index_by_id(id):
+    index = 0
+    for t in tasks_data['tasks']:
+        if t['id'] == id:
+            return index
+        index = index + 1
+    return -1
+
+def edit_task(id):
+    task_index = get_task_index_by_id(id)
+    task = tasks_data['tasks'][task_index]
+    selected_param_proc = task_types[task['type']].ParamsWidget()
+    selected_param_proc.set_params(task['params'])
+
+    global argumentswidget
+    if argumentswidget != None:
+        argumentswidget.setParent(None)
+        argumentswidget = None
+
+    argumentswidget = QWidget()
+    argumentspanel.addWidget(argumentswidget)
+    argumentswidget.setLayout(selected_param_proc.widget)
 
 def main():
 
@@ -50,12 +76,11 @@ def main():
     tasknamepanel.addWidget(QLabel('Task Name'))
     tasknamepanel.addWidget(QComboBox())
 
+    global argumentspanel
     argumentspanel = QVBoxLayout()
     argumentspanel.setAlignment(Qt.AlignTop)
     editpanel.addLayout(argumentspanel)
     argumentspanel.addWidget(QLabel('Arguments'))
-    argumentswidget = QWidget()
-    argumentspanel.addWidget(argumentswidget)
 
     layout.addWidget(SButton('Add'))
 
@@ -63,8 +88,13 @@ def main():
     tasklist = QVBoxLayout()
     tasklist.setAlignment(Qt.AlignTop)
     layout.addLayout(tasklist)
+    last_id = 1
     for t in tasks_data['tasks']:
-        tasklist.addWidget(TaskListEntryWidget(t))
+        t['id'] = last_id
+        tw = TaskListEntryWidget(t)
+        tasklist.addWidget(tw)
+        tw.bt_edit.clicked.connect(lambda s, x = last_id: edit_task(x))
+        last_id = last_id + 1
 
     layout.addWidget(QLabel('Runtime Variables for Simulation'))
     variablespanel = QVBoxLayout()
@@ -94,16 +124,6 @@ def main():
     w.resize(700, 500)
     w.move(300, 300)
     w.setWindowTitle('Task Management')
-
-    #
-    task_types = {'file_copy': params_file_copy, 'unzip': params_unzip}
-
-    #
-    task_index = 0
-    task = tasks_data['tasks'][task_index]
-    selected_param_proc = task_types[task['type']].ParamsWidget()
-    selected_param_proc.set_params(task['params'])
-    argumentswidget.setLayout(selected_param_proc.widget)
 
     w.show()
 
