@@ -18,6 +18,9 @@ argumentswidget = None
 # -1 for new task
 # >0 for editing existing task
 current_edited_task_id = None
+last_selected_type = None
+entered_params = None
+selected_param_proc = None
 
 global argumentspanel
 global com_task_type
@@ -53,6 +56,7 @@ def get_task_index_by_id(id):
     return -1
 
 def set_task_params(task_type, params = None):
+    global selected_param_proc
     selected_param_proc = task_types[task_type].ParamsWidget()
 
     if params != None:
@@ -80,26 +84,52 @@ def edit_task(id):
 
     global com_task_type
     task_type = task['type']
+    params = task['params']
     type_index = com_task_type.findData(task_type)
     com_task_type.setCurrentIndex(type_index)
-    set_task_params(task_type, task['params'])
+    set_task_params(task_type, params)
+
+    global last_selected_type
+    last_selected_type = task_type
+    global entered_params
+    entered_params = { task_type: params }
 
     current_edited_task_id = id
 
 def task_type_selected(type_index):
     if current_edited_task_id == None:
         return
-    new_type = com_task_type.itemData(type_index)
-    set_task_params(new_type, None)
+
+    global entered_params
+    global last_selected_type
+    if selected_param_proc != None:
+        data = {}
+        selected_param_proc.get_params(data)
+        entered_params[last_selected_type] = data
+
+    last_selected_type = com_task_type.itemData(type_index)
+
+    params = None
+    if last_selected_type in entered_params:
+        params = entered_params[last_selected_type]
+
+    set_task_params(last_selected_type, params)
 
 def enable_task(id, is_enabled):
     task_index = get_task_index_by_id(id)
     tasks_data['tasks'][task_index]['is_enabled'] = is_enabled
 
 def commit_task():
+    enable_edit_form(False)
+
+    global entered_params
+    entered_params = None
     global current_edited_task_id
     current_edited_task_id = None
-    enable_edit_form(False)
+    global last_selected_type
+    last_selected_type = None
+    global selected_param_proc
+    selected_param_proc = None
 
 def main():
 
