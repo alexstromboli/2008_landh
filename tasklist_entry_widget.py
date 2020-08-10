@@ -11,13 +11,9 @@ class TaskListEntryWidget(QWidget):
         panel = QHBoxLayout()
         self.setLayout(panel)
 
-        description = task['type'];
-        params = task['params']
-        for p in params:
-            description = description + ", " + p + "=" + params[p]
-
-        lb_description = QLabel(description)
-        panel.addWidget(lb_description)
+        self.lb_description = QLabel()
+        panel.addWidget(self.lb_description)
+        self.update(task)
 
         buttons = QHBoxLayout()
         buttons.setAlignment(Qt.AlignLeft)
@@ -35,3 +31,10 @@ class TaskListEntryWidget(QWidget):
         panel.addLayout(buttons)
 
         self.setLayout(panel)
+
+    def update(self, task):
+        description = task['type'];
+        params = task['params']
+        for p in params:
+            description = description + ", " + p + "=" + params[p]
+        self.lb_description.setText(description)

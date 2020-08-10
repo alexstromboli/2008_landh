@@ -12,7 +12,8 @@ import dummy_data
 
 tasks_data = dummy_data.data
 task_types = {'file_copy': params_file_copy, 'unzip': params_unzip}
-argumentswidget = None
+
+task_entry_widgets_dict = None
 
 # None for non-editing mode
 # -1 for new task
@@ -25,6 +26,7 @@ selected_param_proc = None
 arguments_panel_height = 80
 arguments_panel_margin = 6
 arguments_panel_spacer = None
+argumentswidget = None
 
 global argumentspanel
 global com_task_type
@@ -151,6 +153,9 @@ def commit_task():
             task['type'] = last_selected_type
             task['params'] = params
 
+        global task_entry_widgets_dict
+        task_entry_widgets_dict[current_edited_task_id].update(task)
+
     enable_edit_form(False)
 
     current_edited_task_id = None
@@ -219,9 +224,12 @@ def main():
     tasklist.setAlignment(Qt.AlignTop)
     layout.addLayout(tasklist)
     last_id = 1
+    global task_entry_widgets_dict
+    task_entry_widgets_dict = {}
     for t in tasks_data['tasks']:
         t['id'] = last_id
         tw = TaskListEntryWidget(t)
+        task_entry_widgets_dict[t['id']] = tw
         tasklist.addWidget(tw)
         tw.bt_edit.clicked.connect(lambda s, x = last_id: edit_task(x))
         tw.cb_enable.stateChanged.connect(lambda s, x = last_id: enable_task(x, s == 2))
