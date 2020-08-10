@@ -1,18 +1,11 @@
 data = {}
 
 data['variables'] = []
-data['variables'].append({
-    'name': 'machine_name',
-    'value': 'chicago_main'
-})
-data['variables'].append({
-    'name': 'user',
-    'value': 'maintenance'
-})
-data['variables'].append({
-    'name': 'target_dir',
-    'value': '/data/box'
-})
+data['variables'] = {
+    'machine_name': 'chicago_main',
+    'user': 'maintenance',
+    'target_dir': '/data/box'
+}
 
 data['tasks'] = []
 data['tasks'].append({

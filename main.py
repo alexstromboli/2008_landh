@@ -8,6 +8,7 @@ from PyQt5.QtWidgets import QApplication, QWidget, QHBoxLayout, QVBoxLayout, QPu
 import params_file_copy
 import params_unzip
 from tasklist_entry_widget import TaskListEntryWidget
+from variable_edit import VariableEditWidget
 import dummy_data
 
 tasks_data = dummy_data.data
@@ -321,25 +322,9 @@ def main():
     variablespanel.setAlignment(Qt.AlignTop)
     layout.addLayout(variablespanel)
 
-    var_01_panel = QHBoxLayout()
-    variablespanel.addLayout(var_01_panel)
-    var_01_panel.addWidget(QLabel('var 1'))
-    var_01_panel.addWidget(QLineEdit('---'))
-
-    var_02_panel = QHBoxLayout()
-    variablespanel.addLayout(var_02_panel)
-    var_02_panel.addWidget(QLabel('var 2'))
-    var_02_panel.addWidget(QLineEdit('---'))
-
-    var_03_panel = QHBoxLayout()
-    variablespanel.addLayout(var_03_panel)
-    var_03_panel.addWidget(QLabel('var 3'))
-    var_03_panel.addWidget(QLineEdit('---'))
-
-    var_04_panel = QHBoxLayout()
-    variablespanel.addLayout(var_04_panel)
-    var_04_panel.addWidget(QLabel('var 4'))
-    var_04_panel.addWidget(QLineEdit('---'))
+    vars = tasks_data['variables']
+    for var_name in vars:
+        variablespanel.addWidget(VariableEditWidget(var_name, vars[var_name]))
 
     w.resize(700, 500)
     w.move(300, 300)
