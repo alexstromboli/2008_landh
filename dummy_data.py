@@ -34,7 +34,7 @@ data =\
             'blk_no': 3,
             'is_enabled': False,
             'params':
-                {
+            {
                 'source': './settings',
                 'target': '/data/remote/settings',
                 'buffer_size': '1024'
