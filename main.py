@@ -3,7 +3,7 @@
 import sys
 
 from PyQt5.Qt import Qt
-from PyQt5.QtWidgets import QApplication, QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QLabel, QLineEdit, QComboBox
+from PyQt5.QtWidgets import QApplication, QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QLabel, QLineEdit, QComboBox, QSpacerItem
 
 import params_file_copy
 import params_unzip
@@ -22,6 +22,10 @@ last_selected_type = None
 entered_params = None
 selected_param_proc = None
 
+arguments_panel_height = 80
+arguments_panel_margin = 6
+arguments_panel_spacer = None
+
 global argumentspanel
 global com_task_type
 global bt_add_update_task
@@ -32,6 +36,27 @@ def SButton(text):
     button.setFixedWidth (60)
     return button
 
+def put_arguments_widget(widget = None):
+    global argumentswidget
+    if argumentswidget != None:
+        argumentswidget.setParent(None)
+        argumentswidget = None
+
+    global arguments_panel_spacer
+    global argumentspanel
+    if arguments_panel_spacer != None:
+        argumentspanel.removeItem(arguments_panel_spacer)
+        arguments_panel_spacer = None
+
+    if widget == None:
+        arguments_panel_spacer = QSpacerItem(10, arguments_panel_height + arguments_panel_margin)
+        argumentspanel.addSpacerItem(arguments_panel_spacer)
+    else:
+        argumentswidget = QWidget()
+        argumentspanel.addWidget(argumentswidget)
+        argumentswidget.setLayout(widget)
+        argumentswidget.setFixedHeight(arguments_panel_height)
+
 def enable_edit_form(enable):
     if enable:
         bt_add_update_task.setEnabled(True)
@@ -41,11 +66,7 @@ def enable_edit_form(enable):
         bt_add_update_task.setEnabled(False)
         com_task_type.setEnabled(False)
         tb_blk_no.setEnabled(False)
-
-        global argumentswidget
-        if argumentswidget != None:
-            argumentswidget.setParent(None)
-            argumentswidget = None
+        put_arguments_widget(None)
 
 def get_task_index_by_id(id):
     index = 0
@@ -62,14 +83,7 @@ def set_task_params(task_type, params = None):
     if params != None:
         selected_param_proc.set_params(params)
 
-    global argumentswidget
-    if argumentswidget != None:
-        argumentswidget.setParent(None)
-        argumentswidget = None
-
-    argumentswidget = QWidget()
-    argumentspanel.addWidget(argumentswidget)
-    argumentswidget.setLayout(selected_param_proc.widget)
+    put_arguments_widget(selected_param_proc.widget)
 
 def edit_task(id):
     global current_edited_task_id
@@ -97,6 +111,7 @@ def edit_task(id):
     current_edited_task_id = id
 
 def task_type_selected(type_index):
+    global current_edited_task_id
     if current_edited_task_id == None:
         return
 
@@ -120,16 +135,29 @@ def enable_task(id, is_enabled):
     tasks_data['tasks'][task_index]['is_enabled'] = is_enabled
 
 def commit_task():
+    global current_edited_task_id
+    global selected_param_proc
+    global last_selected_type
+
+    if current_edited_task_id > 0:
+        task_index = get_task_index_by_id(current_edited_task_id)
+        task = tasks_data['tasks'][task_index]
+
+        global entered_params
+        global last_selected_type
+        if selected_param_proc != None:
+            params = {}
+            selected_param_proc.get_params(params)
+            task['type'] = last_selected_type
+            task['params'] = params
+
     enable_edit_form(False)
 
+    current_edited_task_id = None
+    selected_param_proc = None
     global entered_params
     entered_params = None
-    global current_edited_task_id
-    current_edited_task_id = None
-    global last_selected_type
     last_selected_type = None
-    global selected_param_proc
-    selected_param_proc = None
 
 def main():
 
