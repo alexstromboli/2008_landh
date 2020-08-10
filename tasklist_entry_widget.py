@@ -1,5 +1,5 @@
 from PyQt5.Qt import Qt
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QLabel, QPushButton, QCheckBox
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QLabel, QPushButton, QCheckBox, QSpacerItem, QSizePolicy
 
 label_width = 50
 value_width = 180
@@ -19,6 +19,7 @@ class TaskListEntryWidget(QWidget):
 
         self.lb_description = QLabel()
         panel.addWidget(self.lb_description)
+        panel.addSpacerItem(QSpacerItem(1, 1, QSizePolicy.MinimumExpanding))
         self.update(task)
 
         buttons = QHBoxLayout()
