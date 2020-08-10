@@ -37,6 +37,10 @@ global com_task_type
 global bt_add_update_task
 global tb_blk_no
 
+#
+global variablespanel
+global variable_widgets
+
 def SButton(text):
     button = QPushButton(text)
     button.setFixedWidth (60)
@@ -250,6 +254,27 @@ def up_task(id):
     tasklist.removeWidget(tw)
     tasklist.insertWidget(task_index - 1, tw)
 
+def arrange_var_editing():
+    global variablespanel
+    have_empty = False
+
+    global variable_widgets
+    if len(variable_widgets) > 0:
+        var_widget_last = variable_widgets[-1]
+        if var_widget_last.tb_name.text().strip() == '' and var_widget_last.tb_value.text().strip() == '':
+            have_empty = True
+
+    if not have_empty:
+        var_widget = VariableEditWidget()
+        variablespanel.addWidget(var_widget)
+        hook_up_var_widget(var_widget)
+
+def hook_up_var_widget(var_widget):
+    global variable_widgets
+    variable_widgets.append(var_widget)
+    var_widget.tb_name.textChanged.connect(arrange_var_editing)
+    var_widget.tb_value.textChanged.connect(arrange_var_editing)
+
 def main():
 
     app = QApplication(sys.argv)
@@ -317,14 +342,21 @@ def main():
 
     enable_edit_form(False)
 
+    #
     layout.addWidget(QLabel('Runtime Variables for Simulation'))
+    global variablespanel
     variablespanel = QVBoxLayout()
     variablespanel.setAlignment(Qt.AlignTop)
     layout.addLayout(variablespanel)
 
+    global variable_widgets
+    variable_widgets = []
     vars = tasks_data['variables']
     for var_name in vars:
-        variablespanel.addWidget(VariableEditWidget(var_name, vars[var_name]))
+        var_widget = VariableEditWidget(var_name, vars[var_name])
+        variablespanel.addWidget(var_widget)
+        hook_up_var_widget(var_widget)
+    arrange_var_editing()
 
     w.resize(700, 500)
     w.move(300, 300)
