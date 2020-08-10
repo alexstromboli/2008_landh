@@ -2,6 +2,7 @@
 
 import sys
 
+from PyQt5.QtGui import QFont
 from PyQt5.Qt import Qt
 from PyQt5.QtWidgets import QApplication, QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QLabel, QLineEdit, QComboBox, QSpacerItem
 
@@ -45,6 +46,13 @@ def SButton(text):
     button = QPushButton(text)
     button.setFixedWidth (60)
     return button
+
+def SHeaderLabel(text):
+    lb = QLabel(text)
+    font = QFont()
+    font.setBold(True)
+    lb.setFont(font)
+    return lb
 
 def put_arguments_widget(widget = None):
     global argumentswidget
@@ -299,7 +307,7 @@ def main():
     blknopanel = QVBoxLayout()
     blknopanel.setAlignment(Qt.AlignTop)
     editpanel.addLayout(blknopanel)
-    blknopanel.addWidget(QLabel('Blk No'))
+    blknopanel.addWidget(SHeaderLabel('Blk No'))
     global tb_blk_no
     tb_blk_no = QLineEdit()
     tb_blk_no.setFixedWidth (50)
@@ -308,7 +316,7 @@ def main():
     tasknamepanel = QVBoxLayout()
     tasknamepanel.setAlignment(Qt.AlignTop)
     editpanel.addLayout(tasknamepanel)
-    tasknamepanel.addWidget(QLabel('Task Name'))
+    tasknamepanel.addWidget(SHeaderLabel('Task Name'))
 
     global com_task_type
     com_task_type = QComboBox()
@@ -322,7 +330,7 @@ def main():
     argumentspanel = QVBoxLayout()
     argumentspanel.setAlignment(Qt.AlignTop)
     editpanel.addLayout(argumentspanel)
-    argumentspanel.addWidget(QLabel('Arguments'))
+    argumentspanel.addWidget(SHeaderLabel('Arguments'))
 
     global bt_add_update_task
     bt_add_update_task = SButton('Add')
@@ -330,7 +338,7 @@ def main():
     bt_add_update_task.clicked.connect(commit_task)
     enable_edit_form(False)
 
-    layout.addWidget(QLabel('Task List'))
+    layout.addWidget(SHeaderLabel('Task List'))
     global tasklist
     tasklist = QVBoxLayout()
     tasklist.setAlignment(Qt.AlignTop)
@@ -343,7 +351,7 @@ def main():
     enable_edit_form(False)
 
     #
-    layout.addWidget(QLabel('Runtime Variables for Simulation'))
+    layout.addWidget(SHeaderLabel('Runtime Variables for Simulation'))
     global variablespanel
     variablespanel = QVBoxLayout()
     variablespanel.setAlignment(Qt.AlignTop)
