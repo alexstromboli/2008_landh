@@ -1,5 +1,5 @@
 from PyQt5.Qt import Qt
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLabel, QPushButton
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QLabel, QPushButton, QCheckBox
 
 label_width = 50
 value_width = 180
@@ -25,12 +25,13 @@ class TaskListEntryWidget(QWidget):
         self.bt_edit = QPushButton('edit')
         self.bt_delete = QPushButton('delete')
         self.bt_add = QPushButton('add')
-        self.bt_enable = QPushButton('enable')
+        self.cb_enable = QCheckBox()
+        self.cb_enable.setChecked(task['is_enabled'])
         buttons.addWidget(self.bt_up)
         buttons.addWidget(self.bt_edit)
         buttons.addWidget(self.bt_delete)
         buttons.addWidget(self.bt_add)
-        buttons.addWidget(self.bt_enable)
+        buttons.addWidget(self.cb_enable)
         panel.addLayout(buttons)
 
         self.setLayout(panel)

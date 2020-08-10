@@ -43,6 +43,10 @@ def edit_task(id):
     argumentspanel.addWidget(argumentswidget)
     argumentswidget.setLayout(selected_param_proc.widget)
 
+def enable_task(id, is_enabled):
+    task_index = get_task_index_by_id(id)
+    tasks_data['tasks'][task_index]['is_enabled'] = is_enabled
+
 def main():
 
     app = QApplication(sys.argv)
@@ -57,7 +61,9 @@ def main():
     topbar.addWidget(QLabel('<file name>'))
     topbar.addWidget(SButton('Open'))
     topbar.addWidget(SButton('Save'))
-    topbar.addWidget(SButton('Exit'))
+    bt_exit = SButton('Exit')
+    topbar.addWidget(bt_exit)
+    bt_exit.clicked.connect(lambda: w.close())
 
     editpanel = QHBoxLayout()
     layout.addLayout(editpanel)
@@ -94,6 +100,7 @@ def main():
         tw = TaskListEntryWidget(t)
         tasklist.addWidget(tw)
         tw.bt_edit.clicked.connect(lambda s, x = last_id: edit_task(x))
+        tw.cb_enable.stateChanged.connect(lambda s, x = last_id: enable_task(x, s == 2))
         last_id = last_id + 1
 
     layout.addWidget(QLabel('Runtime Variables for Simulation'))
