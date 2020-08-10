@@ -4,6 +4,12 @@ from PyQt5.QtWidgets import QWidget, QHBoxLayout, QLabel, QPushButton, QCheckBox
 label_width = 50
 value_width = 180
 
+
+def SIconButton(text):
+    button = QPushButton(text)
+    button.setFixedWidth(30)
+    return button
+
 class TaskListEntryWidget(QWidget):
     def __init__(self, task):
         QWidget.__init__(self)
@@ -17,10 +23,10 @@ class TaskListEntryWidget(QWidget):
 
         buttons = QHBoxLayout()
         buttons.setAlignment(Qt.AlignLeft)
-        self.bt_up = QPushButton('up')
-        self.bt_edit = QPushButton('edit')
-        self.bt_delete = QPushButton('delete')
-        self.bt_add = QPushButton('add')
+        self.bt_up = SIconButton('↑')
+        self.bt_edit = SIconButton('✎')
+        self.bt_delete = SIconButton('♻')
+        self.bt_add = SIconButton('+')
         self.cb_enable = QCheckBox()
         self.cb_enable.setChecked(task['is_enabled'])
         buttons.addWidget(self.bt_up)

@@ -368,7 +368,7 @@ def main():
 
     w.resize(700, 500)
     w.move(300, 300)
-    w.setWindowTitle('Task Management')
+    w.setWindowTitle('TaskList Management')
 
     w.show()
 
