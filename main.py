@@ -23,6 +23,8 @@ current_edited_task_id = None
 last_selected_type = None
 entered_params = None
 selected_param_proc = None
+task_last_id = 0
+task_insert_before_index = -1
 
 arguments_panel_height = 80
 arguments_panel_margin = 6
@@ -67,10 +69,13 @@ def enable_edit_form(enable):
         tb_blk_no.setEnabled(True)
     else:
         bt_add_update_task.setEnabled(False)
+        com_task_type.setCurrentIndex(-1)
         com_task_type.setEnabled(False)
         tb_blk_no.setEnabled(False)
         tb_blk_no.setText('')
         put_arguments_widget(None)
+        global task_insert_before_index
+        task_insert_before_index = -1
 
 def get_task_index_by_id(id):
     index = 0
@@ -81,6 +86,9 @@ def get_task_index_by_id(id):
     return -1
 
 def set_task_params(task_type, params = None):
+    if task_type == None:
+        return
+
     global selected_param_proc
     selected_param_proc = task_types[task_type].ParamsWidget()
 
@@ -88,6 +96,22 @@ def set_task_params(task_type, params = None):
         selected_param_proc.set_params(params)
 
     put_arguments_widget(selected_param_proc.widget)
+
+def add_task(before_id):
+    global current_edited_task_id
+    if current_edited_task_id != None:
+        return
+
+    global task_insert_before_index
+    task_insert_before_index = get_task_index_by_id(before_id)
+    current_edited_task_id = -1
+
+    enable_edit_form(True)
+    bt_add_update_task.setText('Add')
+
+    global entered_params
+    entered_params = {}
+    com_task_type.setCurrentIndex(0)
 
 def edit_task(id):
     global current_edited_task_id
@@ -140,27 +164,55 @@ def enable_task(id, is_enabled):
     task_index = get_task_index_by_id(id)
     tasks_data['tasks'][task_index]['is_enabled'] = is_enabled
 
+def append_task_to_list(task, insert_before_index = -1):
+    global task_last_id
+    task_last_id = task_last_id + 1
+    task['id'] = task_last_id
+    tw = TaskListEntryWidget(task)
+    task_entry_widgets_dict[task['id']] = tw
+    if insert_before_index < 0:
+        tasklist.addWidget(tw)
+    else:
+        tasklist.insertWidget(insert_before_index, tw)
+    tw.bt_add.clicked.connect(lambda s, x=task_last_id: add_task(x))
+    tw.bt_up.clicked.connect(lambda s, x=task_last_id: up_task(x))
+    tw.bt_edit.clicked.connect(lambda s, x=task_last_id: edit_task(x))
+    tw.cb_enable.stateChanged.connect(lambda s, x=task_last_id: enable_task(x, s == 2))
+    tw.bt_delete.clicked.connect(lambda s, x=task_last_id: delete_task(x))
+
 def commit_task():
     global current_edited_task_id
-    global selected_param_proc
+    if current_edited_task_id == None:
+        return
 
+    global selected_param_proc
     if current_edited_task_id > 0:
         task_index = get_task_index_by_id(current_edited_task_id)
         task = tasks_data['tasks'][task_index]
+    else:
+        task = { 'is_enabled': True }
+        if task_insert_before_index < 0:
+            tasks_data['tasks'].append(task)
+        else:
+            tasks_data['tasks'].insert(task_insert_before_index, task)
 
-        global entered_params
-        global last_selected_type
-        if selected_param_proc != None:
-            params = {}
-            selected_param_proc.get_params(params)
-            task['type'] = last_selected_type
-            task['params'] = params
+    global entered_params
+    global last_selected_type
+    if selected_param_proc != None:
+        params = {}
+        selected_param_proc.get_params(params)
+        task['type'] = last_selected_type
+        task['params'] = params
 
-        task['blk_no'] = tb_blk_no.text()
+    task['blk_no'] = tb_blk_no.text()
 
+    if current_edited_task_id > 0:
         global task_entry_widgets_dict
         task_entry_widgets_dict[current_edited_task_id].update(task)
+    else:
+        append_task_to_list(task, task_insert_before_index)
 
+    #
     enable_edit_form(False)
 
     current_edited_task_id = None
@@ -257,19 +309,10 @@ def main():
     tasklist = QVBoxLayout()
     tasklist.setAlignment(Qt.AlignTop)
     layout.addLayout(tasklist)
-    last_id = 1
     global task_entry_widgets_dict
     task_entry_widgets_dict = {}
     for t in tasks_data['tasks']:
-        t['id'] = last_id
-        tw = TaskListEntryWidget(t)
-        task_entry_widgets_dict[t['id']] = tw
-        tasklist.addWidget(tw)
-        tw.bt_up.clicked.connect(lambda s, x = last_id: up_task(x))
-        tw.bt_edit.clicked.connect(lambda s, x = last_id: edit_task(x))
-        tw.cb_enable.stateChanged.connect(lambda s, x = last_id: enable_task(x, s == 2))
-        tw.bt_delete.clicked.connect(lambda s, x = last_id: delete_task(x))
-        last_id = last_id + 1
+        append_task_to_list(t)
 
     enable_edit_form(False)
 
