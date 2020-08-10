@@ -1,13 +1,17 @@
 from PyQt5.Qt import Qt
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QLabel, QPushButton, QCheckBox, QSpacerItem, QSizePolicy
 
+from PyQt5.QtGui import QFont
+
 label_width = 50
 value_width = 180
 
-
-def SIconButton(text):
+def SIconButton(text, font, tooltip = None):
     button = QPushButton(text)
-    button.setFixedWidth(30)
+    button.setFixedWidth(20)
+    button.setStyleSheet("padding: 0px")
+    button.setFont(font)
+    button.setToolTip(tooltip)
     return button
 
 class TaskListEntryWidget(QWidget):
@@ -16,18 +20,23 @@ class TaskListEntryWidget(QWidget):
 
         panel = QHBoxLayout()
         self.setLayout(panel)
+        panel.setContentsMargins(2, 2, 2, 2)
 
         self.lb_description = QLabel()
         panel.addWidget(self.lb_description)
         panel.addSpacerItem(QSpacerItem(1, 1, QSizePolicy.MinimumExpanding))
         self.update(task)
 
+        font = QFont()
+        font.setBold(True)
+        font.setPointSize(14)
+
         buttons = QHBoxLayout()
         buttons.setAlignment(Qt.AlignLeft)
-        self.bt_up = SIconButton('↑')
-        self.bt_edit = SIconButton('✎')
-        self.bt_delete = SIconButton('♻')
-        self.bt_add = SIconButton('+')
+        self.bt_up = SIconButton('↑', font, 'Move up')
+        self.bt_edit = SIconButton('✎', font, 'Edit')
+        self.bt_delete = SIconButton('♻', font, 'Delete')
+        self.bt_add = SIconButton('+', font, 'Add new')
         self.cb_enable = QCheckBox()
         self.cb_enable.setChecked(task['is_enabled'])
         buttons.addWidget(self.bt_up)

@@ -4,7 +4,7 @@ import sys
 
 from PyQt5.QtGui import QFont
 from PyQt5.Qt import Qt
-from PyQt5.QtWidgets import QApplication, QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QLabel, QLineEdit, QComboBox, QSpacerItem
+from PyQt5.QtWidgets import QApplication, QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QLabel, QLineEdit, QComboBox, QSpacerItem, QScrollArea, QFrame
 
 import params_file_copy
 import params_unzip
@@ -338,11 +338,23 @@ def main():
     bt_add_update_task.clicked.connect(commit_task)
     enable_edit_form(False)
 
+    #
     layout.addWidget(SHeaderLabel('Task List'))
+    task_scroll = QScrollArea()
+    task_scroll.setFixedHeight(200)
+    task_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+    task_scroll.setWidgetResizable(True)
+
     global tasklist
     tasklist = QVBoxLayout()
     tasklist.setAlignment(Qt.AlignTop)
-    layout.addLayout(tasklist)
+
+    task_frame = QFrame(task_scroll)
+    task_frame.setLayout(tasklist)
+
+    layout.addWidget(task_scroll)
+    task_scroll.setWidget(task_frame)
+
     global task_entry_widgets_dict
     task_entry_widgets_dict = {}
     for t in tasks_data['tasks']:
