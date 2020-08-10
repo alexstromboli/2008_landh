@@ -68,6 +68,7 @@ def enable_edit_form(enable):
         bt_add_update_task.setEnabled(False)
         com_task_type.setEnabled(False)
         tb_blk_no.setEnabled(False)
+        tb_blk_no.setText('')
         put_arguments_widget(None)
 
 def get_task_index_by_id(id):
@@ -96,6 +97,8 @@ def edit_task(id):
     task_index = get_task_index_by_id(id)
     task = tasks_data['tasks'][task_index]
 
+    global tb_blk_no
+    tb_blk_no.setText(f'{task["blk_no"]}')
     bt_add_update_task.setText('Update')
 
     global com_task_type
@@ -139,7 +142,6 @@ def enable_task(id, is_enabled):
 def commit_task():
     global current_edited_task_id
     global selected_param_proc
-    global last_selected_type
 
     if current_edited_task_id > 0:
         task_index = get_task_index_by_id(current_edited_task_id)
@@ -152,6 +154,8 @@ def commit_task():
             selected_param_proc.get_params(params)
             task['type'] = last_selected_type
             task['params'] = params
+
+        task['blk_no'] = tb_blk_no.text()
 
         global task_entry_widgets_dict
         task_entry_widgets_dict[current_edited_task_id].update(task)
@@ -190,7 +194,7 @@ def main():
     editpanel.addLayout(blknopanel)
     blknopanel.addWidget(QLabel('Blk No'))
     global tb_blk_no
-    tb_blk_no = QLineEdit('---')
+    tb_blk_no = QLineEdit()
     tb_blk_no.setFixedWidth (50)
     blknopanel.addWidget(tb_blk_no)
 
