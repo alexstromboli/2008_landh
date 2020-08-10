@@ -378,7 +378,7 @@ def main():
         hook_up_var_widget(var_widget)
     arrange_var_editing()
 
-    w.resize(700, 500)
+    w.resize(770, 500)
     w.move(300, 300)
     w.setWindowTitle('TaskList Management')
 
