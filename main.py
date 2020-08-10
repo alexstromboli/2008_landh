@@ -168,6 +168,17 @@ def commit_task():
     entered_params = None
     last_selected_type = None
 
+def delete_task(id):
+    global current_edited_task_id
+    if current_edited_task_id != None:
+        return
+
+    task_index = get_task_index_by_id(id)
+    tasks_data['tasks'].pop(task_index)
+
+    task_entry_widgets_dict[id].setParent(None)
+    del task_entry_widgets_dict[id]
+
 def main():
 
     app = QApplication(sys.argv)
@@ -237,6 +248,7 @@ def main():
         tasklist.addWidget(tw)
         tw.bt_edit.clicked.connect(lambda s, x = last_id: edit_task(x))
         tw.cb_enable.stateChanged.connect(lambda s, x = last_id: enable_task(x, s == 2))
+        tw.bt_delete.clicked.connect(lambda s, x = last_id: delete_task(x))
         last_id = last_id + 1
 
     enable_edit_form(False)
