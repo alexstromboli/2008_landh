@@ -13,6 +13,7 @@ import dummy_data
 tasks_data = dummy_data.data
 task_types = {'file_copy': params_file_copy, 'unzip': params_unzip}
 
+tasklist = None
 task_entry_widgets_dict = None
 
 # None for non-editing mode
@@ -179,6 +180,23 @@ def delete_task(id):
     task_entry_widgets_dict[id].setParent(None)
     del task_entry_widgets_dict[id]
 
+def up_task(id):
+    global current_edited_task_id
+    if current_edited_task_id != None:
+        return
+
+    task_index = get_task_index_by_id(id)
+    if task_index == 0:
+        return
+
+    task = tasks_data['tasks'][task_index]
+    tasks_data['tasks'].pop(task_index)
+    tasks_data['tasks'].insert(task_index - 1, task)
+
+    tw = task_entry_widgets_dict[id]
+    tasklist.removeWidget(tw)
+    tasklist.insertWidget(task_index - 1, tw)
+
 def main():
 
     app = QApplication(sys.argv)
@@ -235,6 +253,7 @@ def main():
     enable_edit_form(False)
 
     layout.addWidget(QLabel('Task List'))
+    global tasklist
     tasklist = QVBoxLayout()
     tasklist.setAlignment(Qt.AlignTop)
     layout.addLayout(tasklist)
@@ -246,6 +265,7 @@ def main():
         tw = TaskListEntryWidget(t)
         task_entry_widgets_dict[t['id']] = tw
         tasklist.addWidget(tw)
+        tw.bt_up.clicked.connect(lambda s, x = last_id: up_task(x))
         tw.bt_edit.clicked.connect(lambda s, x = last_id: edit_task(x))
         tw.cb_enable.stateChanged.connect(lambda s, x = last_id: enable_task(x, s == 2))
         tw.bt_delete.clicked.connect(lambda s, x = last_id: delete_task(x))
