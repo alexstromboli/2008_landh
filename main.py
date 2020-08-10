@@ -13,7 +13,12 @@ import dummy_data
 tasks_data = dummy_data.data
 task_types = {'file_copy': params_file_copy, 'unzip': params_unzip}
 argumentswidget = None
+
+# None for non-editing mode
+# -1 for new task
+# >0 for editing existing task
 current_edited_task_id = None
+
 global argumentspanel
 global com_task_type
 global bt_add_update_task
@@ -47,20 +52,11 @@ def get_task_index_by_id(id):
         index = index + 1
     return -1
 
-def edit_task(id):
-    enable_edit_form(True)
-    task_index = get_task_index_by_id(id)
-    task = tasks_data['tasks'][task_index]
-
-    bt_add_update_task.setText('Update')
-
-    global com_task_type
-    task_type = task['type']
-    type_index = com_task_type.findData(task_type)
-    com_task_type.setCurrentIndex(type_index)
-
+def set_task_params(task_type, params = None):
     selected_param_proc = task_types[task_type].ParamsWidget()
-    selected_param_proc.set_params(task['params'])
+
+    if params != None:
+        selected_param_proc.set_params(params)
 
     global argumentswidget
     if argumentswidget != None:
@@ -71,19 +67,38 @@ def edit_task(id):
     argumentspanel.addWidget(argumentswidget)
     argumentswidget.setLayout(selected_param_proc.widget)
 
+def edit_task(id):
     global current_edited_task_id
+    if current_edited_task_id != None:
+        return
+
+    enable_edit_form(True)
+    task_index = get_task_index_by_id(id)
+    task = tasks_data['tasks'][task_index]
+
+    bt_add_update_task.setText('Update')
+
+    global com_task_type
+    task_type = task['type']
+    type_index = com_task_type.findData(task_type)
+    com_task_type.setCurrentIndex(type_index)
+    set_task_params(task_type, task['params'])
+
     current_edited_task_id = id
 
 def task_type_selected(type_index):
     if current_edited_task_id == None:
         return
-    type_index = type_index
+    new_type = com_task_type.itemData(type_index)
+    set_task_params(new_type, None)
 
 def enable_task(id, is_enabled):
     task_index = get_task_index_by_id(id)
     tasks_data['tasks'][task_index]['is_enabled'] = is_enabled
 
 def commit_task():
+    global current_edited_task_id
+    current_edited_task_id = None
     enable_edit_form(False)
 
 def main():
