@@ -13,12 +13,31 @@ import dummy_data
 tasks_data = dummy_data.data
 task_types = {'file_copy': params_file_copy, 'unzip': params_unzip}
 argumentswidget = None
+current_edited_task_id = None
 global argumentspanel
+global com_task_type
+global bt_add_update_task
+global tb_blk_no
 
 def SButton(text):
     button = QPushButton(text)
     button.setFixedWidth (60)
     return button
+
+def enable_edit_form(enable):
+    if enable:
+        bt_add_update_task.setEnabled(True)
+        com_task_type.setEnabled(True)
+        tb_blk_no.setEnabled(True)
+    else:
+        bt_add_update_task.setEnabled(False)
+        com_task_type.setEnabled(False)
+        tb_blk_no.setEnabled(False)
+
+        global argumentswidget
+        if argumentswidget != None:
+            argumentswidget.setParent(None)
+            argumentswidget = None
 
 def get_task_index_by_id(id):
     index = 0
@@ -29,9 +48,18 @@ def get_task_index_by_id(id):
     return -1
 
 def edit_task(id):
+    enable_edit_form(True)
     task_index = get_task_index_by_id(id)
     task = tasks_data['tasks'][task_index]
-    selected_param_proc = task_types[task['type']].ParamsWidget()
+
+    bt_add_update_task.setText('Update')
+
+    global com_task_type
+    task_type = task['type']
+    type_index = com_task_type.findData(task_type)
+    com_task_type.setCurrentIndex(type_index)
+
+    selected_param_proc = task_types[task_type].ParamsWidget()
     selected_param_proc.set_params(task['params'])
 
     global argumentswidget
@@ -43,9 +71,20 @@ def edit_task(id):
     argumentspanel.addWidget(argumentswidget)
     argumentswidget.setLayout(selected_param_proc.widget)
 
+    global current_edited_task_id
+    current_edited_task_id = id
+
+def task_type_selected(type_index):
+    if current_edited_task_id == None:
+        return
+    type_index = type_index
+
 def enable_task(id, is_enabled):
     task_index = get_task_index_by_id(id)
     tasks_data['tasks'][task_index]['is_enabled'] = is_enabled
+
+def commit_task():
+    enable_edit_form(False)
 
 def main():
 
@@ -72,15 +111,23 @@ def main():
     blknopanel.setAlignment(Qt.AlignTop)
     editpanel.addLayout(blknopanel)
     blknopanel.addWidget(QLabel('Blk No'))
-    blk_line_edit = QLineEdit('---')
-    blk_line_edit.setFixedWidth (50)
-    blknopanel.addWidget(blk_line_edit)
+    global tb_blk_no
+    tb_blk_no = QLineEdit('---')
+    tb_blk_no.setFixedWidth (50)
+    blknopanel.addWidget(tb_blk_no)
 
     tasknamepanel = QVBoxLayout()
     tasknamepanel.setAlignment(Qt.AlignTop)
     editpanel.addLayout(tasknamepanel)
     tasknamepanel.addWidget(QLabel('Task Name'))
-    tasknamepanel.addWidget(QComboBox())
+
+    global com_task_type
+    com_task_type = QComboBox()
+    com_task_type.setFixedWidth (150)
+    tasknamepanel.addWidget(com_task_type)
+    com_task_type.currentIndexChanged.connect(lambda ind: task_type_selected(ind))
+    for tt in task_types:
+        com_task_type.addItem(tt, tt)
 
     global argumentspanel
     argumentspanel = QVBoxLayout()
@@ -88,7 +135,11 @@ def main():
     editpanel.addLayout(argumentspanel)
     argumentspanel.addWidget(QLabel('Arguments'))
 
-    layout.addWidget(SButton('Add'))
+    global bt_add_update_task
+    bt_add_update_task = SButton('Add')
+    layout.addWidget(bt_add_update_task)
+    bt_add_update_task.clicked.connect(commit_task)
+    enable_edit_form(False)
 
     layout.addWidget(QLabel('Task List'))
     tasklist = QVBoxLayout()
@@ -102,6 +153,8 @@ def main():
         tw.bt_edit.clicked.connect(lambda s, x = last_id: edit_task(x))
         tw.cb_enable.stateChanged.connect(lambda s, x = last_id: enable_task(x, s == 2))
         last_id = last_id + 1
+
+    enable_edit_form(False)
 
     layout.addWidget(QLabel('Runtime Variables for Simulation'))
     variablespanel = QVBoxLayout()
