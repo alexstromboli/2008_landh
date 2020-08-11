@@ -1,5 +1,5 @@
 from PyQt5.Qt import Qt
-from PyQt5.QtWidgets import QSpacerItem, QHBoxLayout, QVBoxLayout, QLabel, QLineEdit, QSizePolicy
+from PyQt5.QtWidgets import QWidget, QSpacerItem, QHBoxLayout, QVBoxLayout, QLabel, QLineEdit, QSizePolicy
 
 name_width = 80
 value_width = 130
@@ -17,9 +17,13 @@ class Entry:
     def input(self):
         return self.textbox.text().strip()
 
-class TaskArgumentsEditWidget(QVBoxLayout):
+class TaskArgumentsEditWidget(QWidget):
     def __init__(self, arguments_definition, values = None):
-        QVBoxLayout.__init__(self)
+        QWidget.__init__(self)
+
+        panel = QVBoxLayout()
+        panel.setAlignment(Qt.AlignTop)
+        self.setLayout(panel)
 
         self.map = {}
 
@@ -30,7 +34,7 @@ class TaskArgumentsEditWidget(QVBoxLayout):
             if added % items_per_row == 0:
                 row = QHBoxLayout()
                 row.setAlignment(Qt.AlignLeft)
-                self.addLayout(row)
+                panel.addLayout(row)
             else:
                 row.addSpacerItem(QSpacerItem(gap_width, 1, QSizePolicy.Fixed))
 

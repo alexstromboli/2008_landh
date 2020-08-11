@@ -24,7 +24,6 @@ task_entry_widgets_dict = None
 current_edited_task_id = None
 last_selected_type = None
 entered_params = None
-selected_param_proc = None
 task_last_id = 0
 task_insert_before_index = -1
 
@@ -57,7 +56,7 @@ def SHeaderLabel(text):
     lb.setFont(font)
     return lb
 
-def put_arguments_layout(arguments_layout = None):
+def put_arguments_layout(new_arguments_widget = None):
     global current_arguments_widget
     if current_arguments_widget != None:
         current_arguments_widget.setParent(None)
@@ -69,13 +68,16 @@ def put_arguments_layout(arguments_layout = None):
         argumentspanel.removeItem(arguments_panel_spacer)
         arguments_panel_spacer = None
 
-    if arguments_layout == None:
+    if new_arguments_widget == None:
         arguments_panel_spacer = QSpacerItem(10, arguments_panel_height + arguments_panel_margin)
         argumentspanel.addSpacerItem(arguments_panel_spacer)
     else:
-        current_arguments_widget = QWidget()
-        current_arguments_widget.setLayout(arguments_layout)
+        current_arguments_widget = new_arguments_widget
         argumentspanel.addWidget(current_arguments_widget)
+
+        current_height = current_arguments_widget.sizeHint().height()
+        if current_height < arguments_panel_height:
+            current_arguments_widget.setFixedHeight(arguments_panel_height)
 
 def enable_edit_form(enable):
     if enable:
@@ -104,9 +106,8 @@ def set_task_params(task_type, params = None):
     if task_type == None:
         return
 
-    global selected_param_proc
-    selected_param_proc = TaskArgumentsEditWidget(task_types[task_type], params)
-    put_arguments_layout(selected_param_proc)
+    new_arguments_widget = TaskArgumentsEditWidget(task_types[task_type], params)
+    put_arguments_layout(new_arguments_widget)
 
 def add_task(before_id):
     global current_edited_task_id
@@ -158,8 +159,8 @@ def task_type_selected(type_index):
 
     global entered_params
     global last_selected_type
-    if selected_param_proc != None:
-        entered_params[last_selected_type] = selected_param_proc.read_input()
+    if current_arguments_widget != None:
+        entered_params[last_selected_type] = current_arguments_widget.read_input()
 
     last_selected_type = com_task_type.itemData(type_index)
 
@@ -194,7 +195,7 @@ def commit_task():
     if current_edited_task_id == None:
         return
 
-    global selected_param_proc
+    global current_arguments_widget
     if current_edited_task_id > 0:
         task_index = get_task_index_by_id(current_edited_task_id)
         task = tasks_data['tasks'][task_index]
@@ -207,9 +208,8 @@ def commit_task():
 
     global entered_params
     global last_selected_type
-    if selected_param_proc != None:
-        params = {}
-        selected_param_proc.get_params(params)
+    if current_arguments_widget != None:
+        params = current_arguments_widget.read_input()
         task['type'] = last_selected_type
         task['params'] = params
 
@@ -225,7 +225,6 @@ def commit_task():
     enable_edit_form(False)
 
     current_edited_task_id = None
-    selected_param_proc = None
     global entered_params
     entered_params = None
     last_selected_type = None
