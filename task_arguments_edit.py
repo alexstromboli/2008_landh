@@ -13,6 +13,7 @@ class Entry:
         self.is_mandatory = argument[2] == 'M'
         self.tooltip = argument[3]
         self.textbox = QLineEdit(self.default_value)
+        self.textbox.setToolTip(self.tooltip)
         self.normal_style = self.textbox.styleSheet()
         self.error_style = "border: 1px solid red;"
 
@@ -53,6 +54,7 @@ class TaskArgumentsEditWidget(QWidget):
 
             lb_name = QLabel(f"{entry.name}{' *' if entry.is_mandatory else ''}:")
             lb_name.setFixedWidth(name_width)
+            lb_name.setToolTip(entry.tooltip)
             row.addWidget(lb_name)
 
             entry.textbox.setFixedWidth(value_width)
