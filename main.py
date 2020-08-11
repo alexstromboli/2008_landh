@@ -2,6 +2,7 @@
 
 import sys
 import json
+import copy
 
 from PyQt5.QtGui import QFont
 from PyQt5.Qt import Qt
@@ -13,6 +14,8 @@ from variable_edit import VariableEditWidget
 from task_arguments_edit import TaskArgumentsEditWidget
 import task_definitions
 
+global lb_filename
+loaded_filepath = None
 global tasks_data
 global task_types
 
@@ -306,13 +309,19 @@ def primary_form_init():
 
     topbar = QHBoxLayout()
     layout.addLayout(topbar)
-    topbar.addWidget(QLabel('<file name>'))
+
+    global lb_filename
+    lb_filename = QLabel()
+    topbar.addWidget(lb_filename)
 
     bt_open = SButton('Open')
     topbar.addWidget(bt_open)
     bt_open.clicked.connect(lambda: open_file(app_widget))
 
-    topbar.addWidget(SButton('Save'))
+    bt_save = SButton('Save')
+    topbar.addWidget(bt_save)
+    bt_save.clicked.connect(lambda: save_file())
+
     bt_exit = SButton('Exit')
     topbar.addWidget(bt_exit)
     bt_exit.clicked.connect(lambda: app_widget.close())
@@ -411,17 +420,37 @@ def load_data():
         hook_up_var_widget(var_widget)
     arrange_var_editing()
 
+def save_file():
+    global loaded_filepath
+    if loaded_filepath == None:
+        return
+
+    task_data_copy = copy.deepcopy(tasks_data)
+    tasks = task_data_copy['tasks']
+    for t in tasks:
+        del t['id']
+
+    with open(loaded_filepath, 'w') as outfile:
+        json.dump(task_data_copy, outfile)
+
 def open_file(host):
     options = QFileDialog.Options()
     #options |= QFileDialog.DontUseNativeDialog
-    fileName, _ = QFileDialog.getOpenFileName(host, "Open Task List", "",
+    filepath, _ = QFileDialog.getOpenFileName(host, "Open Task List", "",
                                               "All Files (*);;Json Files (*.json)", options=options)
 
-    if fileName:
-        with open(fileName, 'r') as infile:
+    if filepath:
+        with open(filepath, 'r') as infile:
             global tasks_data
             tasks_data = json.load(infile)
             load_data()
+
+            global lb_filename
+            name = list(filter(lambda s: s.strip(), filepath.replace('\\', '/').split('/')))[-1]
+            lb_filename.setText(name)
+
+            global loaded_filepath
+            loaded_filepath = filepath
 
 def main():
     global application
