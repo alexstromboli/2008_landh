@@ -30,10 +30,13 @@ task_insert_before_index = -1
 
 arguments_panel_height = 80
 arguments_panel_margin = 6
+# placeholder used when no arguments widget is in place
 arguments_panel_spacer = None
-current_arguments_layout = None
+# current arguments form
+current_arguments_widget = None
 
 global argumentspanel
+# dropbox with task types
 global com_task_type
 global bt_add_update_task
 global tb_blk_no
@@ -55,14 +58,13 @@ def SHeaderLabel(text):
     return lb
 
 def put_arguments_layout(arguments_layout = None):
-    global current_arguments_layout
-    global argumentspanel
-    if current_arguments_layout != None:
-        #current_arguments_layout.setParent(None)
-        argumentspanel.removeItem(current_arguments_layout)
-        current_arguments_layout = None
+    global current_arguments_widget
+    if current_arguments_widget != None:
+        current_arguments_widget.setParent(None)
+        current_arguments_widget = None
 
     global arguments_panel_spacer
+    global argumentspanel
     if arguments_panel_spacer != None:
         argumentspanel.removeItem(arguments_panel_spacer)
         arguments_panel_spacer = None
@@ -71,9 +73,9 @@ def put_arguments_layout(arguments_layout = None):
         arguments_panel_spacer = QSpacerItem(10, arguments_panel_height + arguments_panel_margin)
         argumentspanel.addSpacerItem(arguments_panel_spacer)
     else:
-        current_arguments_layout = arguments_layout
-        argumentspanel.addLayout(current_arguments_layout)
-        #current_arguments_layout.setFixedHeight(arguments_panel_height)
+        current_arguments_widget = QWidget()
+        current_arguments_widget.setLayout(arguments_layout)
+        argumentspanel.addWidget(current_arguments_widget)
 
 def enable_edit_form(enable):
     if enable:
