@@ -4,16 +4,16 @@ import sys
 
 from PyQt5.QtGui import QFont
 from PyQt5.Qt import Qt
-from PyQt5.QtWidgets import QApplication, QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QLabel, QLineEdit, QComboBox, QSpacerItem, QScrollArea, QFrame
+from PyQt5.QtWidgets import QApplication, QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QLabel, QLineEdit, QComboBox, QSpacerItem, QScrollArea, QFrame, QSizePolicy
 
-import params_file_copy
-import params_unzip
 from tasklist_entry_widget import TaskListEntryWidget
 from variable_edit import VariableEditWidget
+from task_arguments_edit import TaskArgumentsEditWidget
+import task_definitions
 import dummy_data
 
 tasks_data = dummy_data.data
-task_types = {'file_copy': params_file_copy, 'unzip': params_unzip}
+global task_types
 
 tasklist = None
 task_entry_widgets_dict = None
@@ -31,7 +31,7 @@ task_insert_before_index = -1
 arguments_panel_height = 80
 arguments_panel_margin = 6
 arguments_panel_spacer = None
-argumentswidget = None
+current_arguments_layout = None
 
 global argumentspanel
 global com_task_type
@@ -54,26 +54,26 @@ def SHeaderLabel(text):
     lb.setFont(font)
     return lb
 
-def put_arguments_widget(widget = None):
-    global argumentswidget
-    if argumentswidget != None:
-        argumentswidget.setParent(None)
-        argumentswidget = None
+def put_arguments_layout(arguments_layout = None):
+    global current_arguments_layout
+    global argumentspanel
+    if current_arguments_layout != None:
+        #current_arguments_layout.setParent(None)
+        argumentspanel.removeItem(current_arguments_layout)
+        current_arguments_layout = None
 
     global arguments_panel_spacer
-    global argumentspanel
     if arguments_panel_spacer != None:
         argumentspanel.removeItem(arguments_panel_spacer)
         arguments_panel_spacer = None
 
-    if widget == None:
+    if arguments_layout == None:
         arguments_panel_spacer = QSpacerItem(10, arguments_panel_height + arguments_panel_margin)
         argumentspanel.addSpacerItem(arguments_panel_spacer)
     else:
-        argumentswidget = QWidget()
-        argumentspanel.addWidget(argumentswidget)
-        argumentswidget.setLayout(widget)
-        argumentswidget.setFixedHeight(arguments_panel_height)
+        current_arguments_layout = arguments_layout
+        argumentspanel.addLayout(current_arguments_layout)
+        #current_arguments_layout.setFixedHeight(arguments_panel_height)
 
 def enable_edit_form(enable):
     if enable:
@@ -86,7 +86,7 @@ def enable_edit_form(enable):
         com_task_type.setEnabled(False)
         tb_blk_no.setEnabled(False)
         tb_blk_no.setText('')
-        put_arguments_widget(None)
+        put_arguments_layout(None)
         global task_insert_before_index
         task_insert_before_index = -1
 
@@ -103,12 +103,8 @@ def set_task_params(task_type, params = None):
         return
 
     global selected_param_proc
-    selected_param_proc = task_types[task_type].ParamsWidget()
-
-    if params != None:
-        selected_param_proc.set_params(params)
-
-    put_arguments_widget(selected_param_proc.widget)
+    selected_param_proc = TaskArgumentsEditWidget(task_types[task_type], params)
+    put_arguments_layout(selected_param_proc)
 
 def add_task(before_id):
     global current_edited_task_id
@@ -161,9 +157,7 @@ def task_type_selected(type_index):
     global entered_params
     global last_selected_type
     if selected_param_proc != None:
-        data = {}
-        selected_param_proc.get_params(data)
-        entered_params[last_selected_type] = data
+        entered_params[last_selected_type] = selected_param_proc.read_input()
 
     last_selected_type = com_task_type.itemData(type_index)
 
@@ -284,6 +278,10 @@ def hook_up_var_widget(var_widget):
     var_widget.tb_value.textChanged.connect(arrange_var_editing)
 
 def main():
+    global task_types
+    task_types = {}
+    for tt in task_definitions.definitions:
+        task_types[tt['name']] = tt
 
     app = QApplication(sys.argv)
 
@@ -329,6 +327,7 @@ def main():
     global argumentspanel
     argumentspanel = QVBoxLayout()
     argumentspanel.setAlignment(Qt.AlignTop)
+    editpanel.addSpacerItem(QSpacerItem(30, 1, QSizePolicy.Fixed))
     editpanel.addLayout(argumentspanel)
     argumentspanel.addWidget(SHeaderLabel('Arguments'))
 

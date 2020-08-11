@@ -9,35 +9,40 @@ data =\
     'tasks':
     [
         {
-            'type': 'file_copy',
+            'type': 'copyFile',
             'blk_no': 1,
             'is_enabled': True,
             'params':
             {
-                'source': './local',
-                'target': '/data/remote',
-                'buffer_size': '1024'
+                'filePath': './local',
+                'to': '/data/remote',
+                'ifTrue': 'True'
             }
         },
         {
-            'type': 'unzip',
+            'type': 'getFileList',
             'blk_no': 2,
             'is_enabled': True,
             'params':
             {
-                'zipFilePath': './input/words.zip',
-                'toDir': './local'
+                'fullPath': './input',
+                'ifTrue': 'True',
+                'inFolder': '/home/user/zip',
+                'includes': 'all',
+                'excludes': '*.jpg',
+                'recurse': 'NO',
+                'assign': 'best'
             }
         },
         {
-            'type': 'file_copy',
-            'blk_no': 3,
+            'type': 'copyFile',
+            'blk_no': 5,
             'is_enabled': False,
             'params':
             {
-                'source': './settings',
-                'target': '/data/remote/settings',
-                'buffer_size': '1024'
+                'filePath': './local',
+                'to': '/data/remote',
+                'ifTrue': ''
             }
         }
     ]

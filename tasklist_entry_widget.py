@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import QWidget, QHBoxLayout, QLabel, QPushButton, QCheckBox
 
 from PyQt5.QtGui import QFont
 
+description_width = 550
 label_width = 50
 value_width = 180
 
@@ -24,6 +25,7 @@ class TaskListEntryWidget(QWidget):
 
         self.lb_description = QLabel()
         panel.addWidget(self.lb_description)
+        self.lb_description.setMaximumWidth(description_width)
         panel.addSpacerItem(QSpacerItem(1, 1, QSizePolicy.MinimumExpanding))
         self.update(task)
 
@@ -54,3 +56,4 @@ class TaskListEntryWidget(QWidget):
         for p in params:
             description = description + ", " + p + "=" + params[p]
         self.lb_description.setText(description)
+        self.lb_description.setToolTip(description)
