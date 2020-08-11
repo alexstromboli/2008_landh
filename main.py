@@ -17,6 +17,7 @@ import task_definitions
 
 global lb_filename
 loaded_filepath = None
+is_data_loading = False
 global tasks_data
 global task_types
 global tb_console
@@ -291,6 +292,16 @@ def arrange_var_editing():
         variablespanel.addWidget(var_widget)
         hook_up_var_widget(var_widget)
 
+    global is_data_loading
+    if not is_data_loading:
+        new_variables = {}
+        for v in variable_widgets:
+            name = v.tb_name.text().strip()
+            value = v.tb_value.text().strip()
+            if name != '' and value != '':
+                new_variables[name] = value
+        tasks_data['variables'] = new_variables
+
 def hook_up_var_widget(var_widget):
     global variable_widgets
     variable_widgets.append(var_widget)
@@ -418,33 +429,40 @@ def primary_form_init():
     app_widget.setWindowTitle('TaskList Management')
 
 def load_data():
-    global task_last_id
-    task_last_id = 0
+    global is_data_loading
+    try:
+        is_data_loading = True      # no return before False!
 
-    global tasklist
-    tasklist.addWidget(QWidget())
-    tasklist.addLayout(QHBoxLayout())
-    clear_layout(tasklist)
+        global task_last_id
+        task_last_id = 0
 
-    global task_entry_widgets_dict
-    task_entry_widgets_dict = {}
-    for t in tasks_data['tasks']:
-        append_task_to_list(t)
+        global tasklist
+        clear_layout(tasklist)
 
-    enable_edit_form(False)
+        global task_entry_widgets_dict
+        task_entry_widgets_dict = {}
+        for t in tasks_data['tasks']:
+            append_task_to_list(t)
 
-    #
-    global variablespanel
-    clear_layout(variablespanel)
+        enable_edit_form(False)
 
-    global variable_widgets
-    variable_widgets = []
-    vars = tasks_data['variables']
-    for var_name in vars:
-        var_widget = VariableEditWidget(var_name, vars[var_name])
-        variablespanel.addWidget(var_widget)
-        hook_up_var_widget(var_widget)
-    arrange_var_editing()
+        #
+        global variablespanel
+        clear_layout(variablespanel)
+
+        global variable_widgets
+        variable_widgets = []
+        vars = tasks_data['variables']
+        for var_name in vars:
+            var_widget = VariableEditWidget(var_name, vars[var_name])
+            variablespanel.addWidget(var_widget)
+            hook_up_var_widget(var_widget)
+        arrange_var_editing()
+
+        global tb_console
+        tb_console.setText(None)
+    finally:
+        is_data_loading = False
 
 def save_file():
     global loaded_filepath
