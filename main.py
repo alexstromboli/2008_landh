@@ -208,11 +208,15 @@ def commit_task():
 
     global entered_params
     global last_selected_type
+    params = None
     if current_arguments_widget != None:
-        params = current_arguments_widget.read_input()
-        task['type'] = last_selected_type
-        task['params'] = params
+        params = current_arguments_widget.read_input(True)
 
+    if params == None:
+        return
+
+    task['type'] = last_selected_type
+    task['params'] = params
     task['blk_no'] = tb_blk_no.text()
 
     if current_edited_task_id > 0:

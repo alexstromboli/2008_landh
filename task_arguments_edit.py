@@ -13,9 +13,19 @@ class Entry:
         self.is_mandatory = argument[2] == 'M'
         self.tooltip = argument[3]
         self.textbox = QLineEdit(self.default_value)
+        self.normal_style = self.textbox.styleSheet()
+        self.error_style = "border: 1px solid red;"
 
     def input(self):
         return self.textbox.text().strip()
+
+    def validate(self):
+        if self.is_mandatory and self.input() == '':
+            self.textbox.setStyleSheet(self.error_style)
+            return False
+
+        self.textbox.setStyleSheet(self.normal_style)
+        return True
 
 class TaskArgumentsEditWidget(QWidget):
     def __init__(self, arguments_definition, values = None):
@@ -53,8 +63,17 @@ class TaskArgumentsEditWidget(QWidget):
 
             added = added + 1
 
-    def read_input(self):
+    def read_input(self, validate = False):
         result = {}
+        valid = True
         for name in self.map:
-            result[name] = self.map[name].input()
+            tb = self.map[name]
+            input = tb.input()
+            result[name] = input
+            if validate and not tb.validate():
+                valid = False
+
+        if not valid:
+            return None
+
         return result
