@@ -1,18 +1,19 @@
 #!/usr/bin/python3
 
 import sys
+import json
 
 from PyQt5.QtGui import QFont
 from PyQt5.Qt import Qt
-from PyQt5.QtWidgets import QApplication, QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QLabel, QLineEdit, QComboBox, QSpacerItem, QScrollArea, QFrame, QSizePolicy
+from PyQt5.QtWidgets import QApplication, QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QLabel,\
+    QLineEdit, QComboBox, QSpacerItem, QScrollArea, QFrame, QSizePolicy, QFileDialog
 
 from tasklist_entry_widget import TaskListEntryWidget
 from variable_edit import VariableEditWidget
 from task_arguments_edit import TaskArgumentsEditWidget
 import task_definitions
-import dummy_data
 
-tasks_data = dummy_data.data
+global tasks_data
 global task_types
 
 global application
@@ -306,7 +307,11 @@ def primary_form_init():
     topbar = QHBoxLayout()
     layout.addLayout(topbar)
     topbar.addWidget(QLabel('<file name>'))
-    topbar.addWidget(SButton('Open'))
+
+    bt_open = SButton('Open')
+    topbar.addWidget(bt_open)
+    bt_open.clicked.connect(lambda: open_file(app_widget))
+
     topbar.addWidget(SButton('Save'))
     bt_exit = SButton('Exit')
     topbar.addWidget(bt_exit)
@@ -377,7 +382,7 @@ def primary_form_init():
     app_widget.move(300, 300)
     app_widget.setWindowTitle('TaskList Management')
 
-def load_data(tasks_data):
+def load_data():
     global task_last_id
     task_last_id = 0
 
@@ -406,13 +411,23 @@ def load_data(tasks_data):
         hook_up_var_widget(var_widget)
     arrange_var_editing()
 
+def open_file(host):
+    options = QFileDialog.Options()
+    #options |= QFileDialog.DontUseNativeDialog
+    fileName, _ = QFileDialog.getOpenFileName(host, "Open Task List", "",
+                                              "All Files (*);;Json Files (*.json)", options=options)
+
+    if fileName:
+        with open(fileName, 'r') as infile:
+            global tasks_data
+            tasks_data = json.load(infile)
+            load_data()
+
 def main():
     global application
     application = QApplication(sys.argv)
 
     primary_form_init()
-
-    load_data(tasks_data)
 
     #
     global app_widget
