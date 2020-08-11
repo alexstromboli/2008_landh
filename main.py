@@ -15,6 +15,9 @@ import dummy_data
 tasks_data = dummy_data.data
 global task_types
 
+global application
+global app_widget
+
 tasklist = None
 task_entry_widgets_dict = None
 
@@ -56,10 +59,16 @@ def SHeaderLabel(text):
     lb.setFont(font)
     return lb
 
+def clear_layout(layout):
+    while layout.count():
+        child = layout.takeAt(0)
+        if child.widget():
+            child.widget().deleteLater()
+
 def put_arguments_layout(new_arguments_widget = None):
     global current_arguments_widget
     if current_arguments_widget != None:
-        current_arguments_widget.setParent(None)
+        current_arguments_widget.deleteLater()
         current_arguments_widget = None
 
     global arguments_panel_spacer
@@ -241,7 +250,7 @@ def delete_task(id):
     task_index = get_task_index_by_id(id)
     tasks_data['tasks'].pop(task_index)
 
-    task_entry_widgets_dict[id].setParent(None)
+    task_entry_widgets_dict[id].deleteLater()
     del task_entry_widgets_dict[id]
 
 def up_task(id):
@@ -282,18 +291,17 @@ def hook_up_var_widget(var_widget):
     var_widget.tb_name.textChanged.connect(arrange_var_editing)
     var_widget.tb_value.textChanged.connect(arrange_var_editing)
 
-def main():
+def primary_form_init():
     global task_types
     task_types = {}
     for tt in task_definitions.definitions:
         task_types[tt['name']] = tt
 
-    app = QApplication(sys.argv)
-
-    w = QWidget()
+    global app_widget
+    app_widget = QWidget()
     layout = QVBoxLayout()
     layout.setAlignment(Qt.AlignTop)
-    w.setLayout(layout)
+    app_widget.setLayout(layout)
 
     topbar = QHBoxLayout()
     layout.addLayout(topbar)
@@ -302,7 +310,7 @@ def main():
     topbar.addWidget(SButton('Save'))
     bt_exit = SButton('Exit')
     topbar.addWidget(bt_exit)
-    bt_exit.clicked.connect(lambda: w.close())
+    bt_exit.clicked.connect(lambda: app_widget.close())
 
     editpanel = QHBoxLayout()
     layout.addLayout(editpanel)
@@ -359,6 +367,25 @@ def main():
     layout.addWidget(task_scroll)
     task_scroll.setWidget(task_frame)
 
+    layout.addWidget(SHeaderLabel('Runtime Variables for Simulation'))
+    global variablespanel
+    variablespanel = QVBoxLayout()
+    variablespanel.setAlignment(Qt.AlignTop)
+    layout.addLayout(variablespanel)
+
+    app_widget.resize(770, 500)
+    app_widget.move(300, 300)
+    app_widget.setWindowTitle('TaskList Management')
+
+def load_data(tasks_data):
+    global task_last_id
+    task_last_id = 0
+
+    global tasklist
+    tasklist.addWidget(QWidget())
+    tasklist.addLayout(QHBoxLayout())
+    clear_layout(tasklist)
+
     global task_entry_widgets_dict
     task_entry_widgets_dict = {}
     for t in tasks_data['tasks']:
@@ -367,11 +394,8 @@ def main():
     enable_edit_form(False)
 
     #
-    layout.addWidget(SHeaderLabel('Runtime Variables for Simulation'))
     global variablespanel
-    variablespanel = QVBoxLayout()
-    variablespanel.setAlignment(Qt.AlignTop)
-    layout.addLayout(variablespanel)
+    clear_layout(variablespanel)
 
     global variable_widgets
     variable_widgets = []
@@ -382,13 +406,18 @@ def main():
         hook_up_var_widget(var_widget)
     arrange_var_editing()
 
-    w.resize(770, 500)
-    w.move(300, 300)
-    w.setWindowTitle('TaskList Management')
+def main():
+    global application
+    application = QApplication(sys.argv)
 
-    w.show()
+    primary_form_init()
 
-    sys.exit(app.exec_())
+    load_data(tasks_data)
+
+    #
+    global app_widget
+    app_widget.show()
+    sys.exit(application.exec_())
 
 
 if __name__ == '__main__':
