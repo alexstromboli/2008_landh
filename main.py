@@ -6,18 +6,20 @@ import copy
 
 from PyQt5.QtGui import QFont
 from PyQt5.Qt import Qt
-from PyQt5.QtWidgets import QApplication, QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QLabel,\
+from PyQt5.QtWidgets import QApplication, QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QLabel, QTextEdit,\
     QLineEdit, QComboBox, QSpacerItem, QScrollArea, QFrame, QSizePolicy, QFileDialog
 
 from tasklist_entry_widget import TaskListEntryWidget
 from variable_edit import VariableEditWidget
 from task_arguments_edit import TaskArgumentsEditWidget
+from taskfile_runner import TaskFileRunner
 import task_definitions
 
 global lb_filename
 loaded_filepath = None
 global tasks_data
 global task_types
+global tb_console
 
 global application
 global app_widget
@@ -295,6 +297,18 @@ def hook_up_var_widget(var_widget):
     var_widget.tb_name.textChanged.connect(arrange_var_editing)
     var_widget.tb_value.textChanged.connect(arrange_var_editing)
 
+def run_tasks():
+    global loaded_filepath
+    if loaded_filepath == None:
+        return
+
+    save_file()
+
+    runner = TaskFileRunner(loaded_filepath)
+    result = runner.Run()
+    global tb_console
+    tb_console.setText(result)
+
 def primary_form_init():
     global task_types
     task_types = {}
@@ -362,6 +376,7 @@ def primary_form_init():
     bt_add_update_task = SButton('Add')
     layout.addWidget(bt_add_update_task)
     bt_add_update_task.clicked.connect(commit_task)
+
     enable_edit_form(False)
 
     #
@@ -387,8 +402,19 @@ def primary_form_init():
     variablespanel.setAlignment(Qt.AlignTop)
     layout.addLayout(variablespanel)
 
+    bt_run = SButton('Run')
+    layout.addWidget(bt_run)
+    bt_run.clicked.connect(run_tasks)
+
+    layout.addWidget(SHeaderLabel('Console'))
+    global tb_console
+    tb_console = QTextEdit()
+    tb_console.setReadOnly(True)
+    layout.addWidget(tb_console)
+
+    #
     app_widget.resize(770, 500)
-    app_widget.move(300, 300)
+    app_widget.move(300, 100)
     app_widget.setWindowTitle('TaskList Management')
 
 def load_data():
